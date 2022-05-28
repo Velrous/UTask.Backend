@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Ninject;
 using Ninject.Modules;
+using UTask.Backend.Domain.Options;
 using UTask.Backend.Domain.Services.Implementations.UTaskImplementations.ForWeb;
 using UTask.Backend.Domain.Services.Interfaces.UTaskInterfaces.ForWeb;
 using UTask.Backend.Infrastructure.Contexts;
@@ -53,6 +54,9 @@ namespace UTask.Backend.Domain.Ninject
 
             Bind<UTaskContext>().ToSelf().InTransientScope()
                 .WithConstructorArgument("options", utaskOptions);
+
+            var jwtOptions = configuration.GetSection("JwtOptions").Get<JwtOptions>();
+            Bind<JwtOptions>().ToSelf().InTransientScope().WithConstructorArgument("options", jwtOptions);
         }
 
         /// <summary>
@@ -71,7 +75,10 @@ namespace UTask.Backend.Domain.Ninject
         /// </summary>
         public void AddServiceBindings()
         {
+            Bind<IAuthService>().To<AuthService>();
+            Bind<INoteService>().To<NoteService>();
             Bind<IRoleService>().To<RoleService>();
+            Bind<IUserService>().To<UserService>();
         }
 
         /// <summary>

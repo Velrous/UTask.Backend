@@ -25,7 +25,7 @@ namespace UTask.Backend.Infrastructure.Repositories.Implementations.BaseImplemen
         /// </summary>
         /// <param name="id">Идентификатор объекта</param>
         /// <returns>Объект</returns>
-        public T GetById(TKey id)
+        public T? GetById(TKey id)
         {
             return Context.Set<T>().Find(id);
         }
@@ -35,9 +35,9 @@ namespace UTask.Backend.Infrastructure.Repositories.Implementations.BaseImplemen
         /// </summary>
         /// <param name="id">Идентификатор объекта</param>
         /// <returns>Объект</returns>
-        public T GetByIdFromDatabase(TKey id)
+        public T? GetByIdFromDatabase(TKey id)
         {
-            var entity = Context.Set<T>().Local.FirstOrDefault(x => x.Id.Equals(id));
+            var entity = Context.Set<T>().Local.FirstOrDefault(x => x.Id != null && x.Id.Equals(id));
             if (entity != null)
             {
                 Context.Entry(entity).State = EntityState.Detached;

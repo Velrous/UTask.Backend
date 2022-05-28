@@ -6,7 +6,7 @@
     public static class ServerContext
     {
         [ThreadStatic]
-        private static int _userId;
+        private static long _userId;
         [ThreadStatic]
         private static int _userRoleId;
         [ThreadStatic]
@@ -17,7 +17,7 @@
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
-        public static int UserId
+        public static long UserId
         {
             get => _userId;
             set

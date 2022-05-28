@@ -14,13 +14,13 @@ namespace UTask.Backend.Infrastructure.Repositories.Interfaces.BaseInterfaces
         /// </summary>
         /// <param name="id">Идентификатор объекта</param>
         /// <returns>Объект</returns>
-        T GetById(TKey id);
+        T? GetById(TKey id);
 
         /// <summary>
         /// Возвращает объект по его идентификатору (только из БД)
         /// </summary>
         /// <param name="id">Идентификатор объекта</param>
         /// <returns>Объект</returns>
-        T GetByIdFromDatabase(TKey id);
+        T? GetByIdFromDatabase(TKey id);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Ninject;
 using UTask.Backend.Domain.Ninject;
 using UTask.Backend.Domain.Services.Interfaces.UTaskInterfaces.ForWeb;
@@ -45,6 +46,7 @@ namespace UTask.Backend.WebAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ActionResult Get()
         {
             try
@@ -54,6 +56,7 @@ namespace UTask.Backend.WebAPI.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError(e, $"При попытке получения ролей, произошла ошибка.");
                 return StatusCode(StatusCodes.Status500InternalServerError, e);
             }
         }
