@@ -1,11 +1,12 @@
-﻿using UTask.Backend.Infrastructure.Entities.BaseImplementations;
+﻿using System.ComponentModel.DataAnnotations;
+using UTask.Backend.Infrastructure.Entities.BaseImplementations;
 
 namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
 {
     /// <summary>
-    /// Отношение пользователя и группы
+    /// Категория
     /// </summary>
-    public class UserGroupRelationDao : EntityDao
+    public class CategoryDao : EntityWithIdDao<long>
     {
         /// <summary>
         /// Идентификатор пользователя
@@ -16,12 +17,13 @@ namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
         /// </summary>
         public UserDao? User { get; set; }
         /// <summary>
-        /// Идентификатор группы
+        /// Наименование
         /// </summary>
-        public long GroupId { get; set; }
+        [MaxLength(128)]
+        public string Name { get; set; } = string.Empty;
         /// <summary>
-        /// Группа
+        /// Дата и время создания
         /// </summary>
-        public GroupDao? Group { get; set; }
+        public DateTime Created { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace UTask.Backend.Domain.Services.Interfaces.UTaskInterfaces.ForWeb
         void Update(Note note);
 
         /// <summary>
-        /// Удаляет переданную заметку
+        /// Удаляет заметку по переданному идентификатору
         /// </summary>
         /// <param name="id">Идентификатор заметки</param>
         void Delete(long id);

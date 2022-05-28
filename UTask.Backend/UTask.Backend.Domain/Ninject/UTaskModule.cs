@@ -76,6 +76,7 @@ namespace UTask.Backend.Domain.Ninject
         public void AddServiceBindings()
         {
             Bind<IAuthService>().To<AuthService>();
+            Bind<ICategoryService>().To<CategoryService>();
             Bind<INoteService>().To<NoteService>();
             Bind<IRoleService>().To<RoleService>();
             Bind<IUserService>().To<UserService>();

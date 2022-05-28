@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using UTask.Backend.Domain.Entities.Categories;
 using UTask.Backend.Domain.Entities.Notes;
 
 namespace UTask.Backend.WebAPI
@@ -69,6 +70,7 @@ namespace UTask.Backend.WebAPI
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Note>("Notes");
+            builder.EntitySet<Category>("Categories");
             return builder.GetEdmModel();
         }
     }

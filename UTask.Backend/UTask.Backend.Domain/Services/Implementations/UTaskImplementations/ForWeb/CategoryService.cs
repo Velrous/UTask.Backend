@@ -2,7 +2,7 @@
 using Ninject;
 using Ninject.Parameters;
 using UTask.Backend.Common.Base.Contexts;
-using UTask.Backend.Domain.Entities.Notes;
+using UTask.Backend.Domain.Entities.Categories;
 using UTask.Backend.Domain.Ninject;
 using UTask.Backend.Domain.Services.Implementations.BaseImplementations;
 using UTask.Backend.Domain.Services.Interfaces.UTaskInterfaces.ForWeb;
@@ -13,9 +13,9 @@ using UTask.Backend.Infrastructure.Repositories.Interfaces.BaseInterfaces;
 namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.ForWeb
 {
     /// <summary>
-    /// Сервис работы с заметками
+    /// Сервис работы с категориями
     /// </summary>
-    public class NoteService : BaseService, INoteService
+    public class CategoryService : BaseService, ICategoryService
     {
         #region Контексты
 
@@ -25,7 +25,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
 
         #region Репозитории
 
-        private readonly IEntityWithIdRepository<NoteDao, long> _noteRepository;
+        private readonly IEntityWithIdRepository<CategoryDao, long> _categoryRepository;
 
         #endregion
 
@@ -36,9 +36,9 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         #endregion
 
         /// <summary>
-        /// Сервис работы с заметками
+        /// Сервис работы с категориями
         /// </summary>
-        public NoteService()
+        public CategoryService()
         {
             #region Получаем экземпляры NinjectModule
 
@@ -54,7 +54,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
 
             #region Получаем экземпляры требуемых репозиториев
 
-            _noteRepository = kernel.Get<IEntityWithIdRepository<NoteDao, long>>(new ConstructorArgument("context", _utaskContext));
+            _categoryRepository = kernel.Get<IEntityWithIdRepository<CategoryDao, long>>(new ConstructorArgument("context", _utaskContext));
 
             #endregion
 
@@ -66,27 +66,27 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         }
 
         /// <summary>
-        /// Создаёт новую заметку
+        /// Создаёт новую категорию
         /// </summary>
-        /// <param name="note">Новая заметка</param>
-        /// <returns>Созданная заметка</returns>
-        public Note Create(Note note)
+        /// <param name="category">Новая категория</param>
+        /// <returns>Созданная категория</returns>
+        public Category Create(Category category)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(note.Description))
+                if (!string.IsNullOrWhiteSpace(category.Name))
                 {
                     if (ServerContext.UserId > 0)
                     {
-                        var noteDao = new NoteDao
+                        var categoryDao = new CategoryDao
                         {
                             UserId = ServerContext.UserId,
-                            Description = note.Description,
+                            Name = category.Name,
                             Created = DateTime.Now
                         };
-                        noteDao = _noteRepository.Create(noteDao);
+                        categoryDao = _categoryRepository.Create(categoryDao);
                         _utaskContext.SaveChanges();
-                        return _mapper.Map<Note>(noteDao);
+                        return _mapper.Map<Category>(categoryDao);
                     }
                     else
                     {
@@ -95,7 +95,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                 }
                 else
                 {
-                    throw new Exception($"Передано пустое описание");
+                    throw new Exception($"Передано пустое наименование");
                 }
             }
             catch (Exception e)
@@ -105,18 +105,18 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         }
 
         /// <summary>
-        /// Возвращает интерфейс для запроса заметок
+        /// Возвращает интерфейс для запроса категорий
         /// </summary>
-        /// <returns>Интерфейс для запроса заметок</returns>
-        public IQueryable<Note> GetQueryable()
+        /// <returns>Интерфейс для запроса категорий</returns>
+        public IQueryable<Category> GetQueryable()
         {
             try
             {
                 if (ServerContext.UserId > 0)
                 {
-                    var noteQueryable = _noteRepository.GetQueryable()
-                        .Where(x=>x.UserId == ServerContext.UserId);
-                    return _mapper.ProjectTo<Note>(noteQueryable);
+                    var categoryQueryable = _categoryRepository.GetQueryable()
+                        .Where(x => x.UserId == ServerContext.UserId);
+                    return _mapper.ProjectTo<Category>(categoryQueryable);
                 }
                 else
                 {
@@ -130,22 +130,22 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         }
 
         /// <summary>
-        /// Обновляет данные заметки
+        /// Обновляет данные категории
         /// </summary>
-        /// <param name="note">Измененная заметка</param>
-        public void Update(Note note)
+        /// <param name="category">Измененная категория</param>
+        public void Update(Category category)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(note.Description))
+                if (!string.IsNullOrWhiteSpace(category.Name))
                 {
-                    var noteDao = _noteRepository.GetById(note.Id);
-                    if (noteDao != null)
+                    var categoryDao = _categoryRepository.GetById(category.Id);
+                    if (categoryDao != null)
                     {
-                        if (ServerContext.UserId == noteDao.UserId)
+                        if (ServerContext.UserId == categoryDao.UserId)
                         {
-                            noteDao.Description = note.Description;
-                            _noteRepository.Update(noteDao);
+                            categoryDao.Name = category.Name;
+                            _categoryRepository.Update(categoryDao);
                             _utaskContext.SaveChanges();
                         }
                         else
@@ -155,12 +155,12 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                     }
                     else
                     {
-                        throw new Exception($"Заметка не найдена");
+                        throw new Exception($"Категория не найдена");
                     }
                 }
                 else
                 {
-                    throw new Exception($"Передано пустое описание");
+                    throw new Exception($"Передано пустое наименование");
                 }
             }
             catch (Exception e)
@@ -170,19 +170,19 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         }
 
         /// <summary>
-        /// Удаляет заметку по переданному идентификатору
+        /// Удаляет категорию по переданному идентификатору
         /// </summary>
-        /// <param name="id">Идентификатор заметки</param>
+        /// <param name="id">Идентификатор категории</param>
         public void Delete(long id)
         {
             try
             {
-                var noteDao = _noteRepository.GetById(id);
-                if (noteDao != null)
+                var categoryDao = _categoryRepository.GetById(id);
+                if (categoryDao != null)
                 {
-                    if (ServerContext.UserId == noteDao.UserId)
+                    if (ServerContext.UserId == categoryDao.UserId)
                     {
-                        _noteRepository.Delete(noteDao);
+                        _categoryRepository.Delete(categoryDao);
                         _utaskContext.SaveChanges();
                     }
                     else
@@ -192,7 +192,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                 }
                 else
                 {
-                    throw new Exception($"Заметка не найдена");
+                    throw new Exception($"Категория не найдена");
                 }
             }
             catch (Exception e)

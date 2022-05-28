@@ -22,25 +22,31 @@ namespace UTask.Backend.Infrastructure.Contexts
         {
             #region Указываем связанные с сущностями таблицы в БД
 
+            modelBuilder.Entity<CategoryDao>().ToTable("Categories", "dbo");
             modelBuilder.Entity<GoalDao>().ToTable("Goals", "dbo");
             modelBuilder.Entity<GoalTaskRelationDao>().ToTable("GoalTaskRelations", "dbo");
-            modelBuilder.Entity<GroupDao>().ToTable("Groups", "dbo");
             modelBuilder.Entity<NoteDao>().ToTable("Notes", "dbo");
             modelBuilder.Entity<RoleDao>().ToTable("Roles", "dbo");
             modelBuilder.Entity<TaskDao>().ToTable("Tasks", "dbo");
-            modelBuilder.Entity<TaskGroupRelationDao>().ToTable("TaskGroupRelations", "dbo");
             modelBuilder.Entity<TaskNotificationDao>().ToTable("TaskNotifications", "dbo");
             modelBuilder.Entity<TaskTypeDao>().ToTable("TaskTypes", "dbo");
             modelBuilder.Entity<UserCodeDao>().ToTable("UserCodes", "dbo");
             modelBuilder.Entity<UserDao>().ToTable("Users", "dbo");
             modelBuilder.Entity<UserGoalRelationDao>().ToTable("UserGoalRelations", "dbo");
-            modelBuilder.Entity<UserGroupRelationDao>().ToTable("UserGroupRelations", "dbo");
             modelBuilder.Entity<UserRoleRelationDao>().ToTable("UserRoleRelations", "dbo");
             modelBuilder.Entity<UserSettingDao>().ToTable("UserSettings", "dbo");
 
             #endregion
 
             #region Указываем первичные ключи
+
+            #region CategoryDao
+
+            modelBuilder.Entity<CategoryDao>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            #endregion
 
             #region GoalDao
 
@@ -54,14 +60,6 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             modelBuilder.Entity<GoalTaskRelationDao>()
                 .HasKey(k=> new {k.GoalId, k.TaskId});
-
-            #endregion
-
-            #region GroupDao
-
-            modelBuilder.Entity<GroupDao>()
-                .Property(p => p.Id)
-                .ValueGeneratedOnAdd();
 
             #endregion
 
@@ -86,13 +84,6 @@ namespace UTask.Backend.Infrastructure.Contexts
             modelBuilder.Entity<TaskDao>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
-
-            #endregion
-
-            #region TaskGroupRelationDao
-
-            modelBuilder.Entity<TaskGroupRelationDao>()
-                .HasKey(k => new {k.TaskId, k.GroupId});
 
             #endregion
 
@@ -134,13 +125,6 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             #endregion
 
-            #region UserGroupRelationDao
-
-            modelBuilder.Entity<UserGroupRelationDao>()
-                .HasKey(k => new { k.UserId, k.GroupId });
-
-            #endregion
-
             #region UserRoleRelationDao
 
             modelBuilder.Entity<UserRoleRelationDao>()
@@ -159,6 +143,15 @@ namespace UTask.Backend.Infrastructure.Contexts
             #endregion
 
             #region Указываем внешние ключи
+
+            #region CategoryDao
+
+            modelBuilder.Entity<CategoryDao>()
+                .HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId);
+
+            #endregion
 
             #region GoalTaskRelationDao
 
@@ -192,20 +185,6 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             #endregion
 
-            #region TaskGroupRelationDao
-
-            modelBuilder.Entity<TaskGroupRelationDao>()
-                .HasOne(x => x.Task)
-                .WithMany()
-                .HasForeignKey(x => x.TaskId);
-
-            modelBuilder.Entity<TaskGroupRelationDao>()
-                .HasOne(x => x.Group)
-                .WithMany()
-                .HasForeignKey(x => x.GroupId);
-
-            #endregion
-
             #region TaskNotificationDao
 
             modelBuilder.Entity<TaskNotificationDao>()
@@ -235,20 +214,6 @@ namespace UTask.Backend.Infrastructure.Contexts
                 .HasOne(x => x.Goal)
                 .WithMany()
                 .HasForeignKey(x => x.GoalId);
-
-            #endregion
-
-            #region UserGroupRelationDao
-
-            modelBuilder.Entity<UserGroupRelationDao>()
-                .HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId);
-
-            modelBuilder.Entity<UserGroupRelationDao>()
-                .HasOne(x => x.Group)
-                .WithMany()
-                .HasForeignKey(x => x.GroupId);
 
             #endregion
 
