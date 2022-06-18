@@ -9,9 +9,21 @@ namespace UTask.Backend.Domain.Services.Interfaces.UTaskInterfaces.ForWeb
     public interface IUserService : IBaseService
     {
         /// <summary>
-        /// Возвращает интерфейс для запроса пользователей для веб-интерфейса
+        /// Возвращает текущего пользователя для веб-интерфейса
         /// </summary>
-        /// <returns>Интерфейс для запроса пользователей для веб-интерфейса</returns>
+        /// <returns>Пользователь для отображения на клиенте</returns>
+        UserForWeb GetCurrentUserForWeb();
+
+        /// <summary>
+        /// Возвращает интерфейс для запроса к пользователям для отображения на клиенте
+        /// </summary>
+        /// <returns>Интерфейс для запроса к пользователям для отображения на клиенте</returns>
         IQueryable<UserForWeb> GetQueryableForWeb();
+
+        /// <summary>
+        /// Обновляет данные пользователя
+        /// <param name="userForWeb">Пользователь для отображения на клиенте</param>
+        /// </summary>
+        void Update(UserForWeb userForWeb);
     }
 }

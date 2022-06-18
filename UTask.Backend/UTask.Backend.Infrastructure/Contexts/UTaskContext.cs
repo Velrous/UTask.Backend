@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UTask.Backend.Infrastructure.Entities.UTaskImplementations;
+using UTask.Backend.Infrastructure.Entities.UTaskImplementations.Views;
 
 namespace UTask.Backend.Infrastructure.Contexts
 {
@@ -26,15 +27,20 @@ namespace UTask.Backend.Infrastructure.Contexts
             modelBuilder.Entity<GoalDao>().ToTable("Goals", "dbo");
             modelBuilder.Entity<GoalTaskRelationDao>().ToTable("GoalTaskRelations", "dbo");
             modelBuilder.Entity<NoteDao>().ToTable("Notes", "dbo");
+            modelBuilder.Entity<PlanDao>().ToTable("Plans", "dbo");
+            modelBuilder.Entity<PlanPriorityDao>().ToTable("PlanPriorities", "dbo");
             modelBuilder.Entity<RoleDao>().ToTable("Roles", "dbo");
             modelBuilder.Entity<TaskDao>().ToTable("Tasks", "dbo");
             modelBuilder.Entity<TaskNotificationDao>().ToTable("TaskNotifications", "dbo");
             modelBuilder.Entity<TaskTypeDao>().ToTable("TaskTypes", "dbo");
             modelBuilder.Entity<UserCodeDao>().ToTable("UserCodes", "dbo");
             modelBuilder.Entity<UserDao>().ToTable("Users", "dbo");
-            modelBuilder.Entity<UserGoalRelationDao>().ToTable("UserGoalRelations", "dbo");
             modelBuilder.Entity<UserRoleRelationDao>().ToTable("UserRoleRelations", "dbo");
             modelBuilder.Entity<UserSettingDao>().ToTable("UserSettings", "dbo");
+
+            modelBuilder.Entity<GoalViewDao>().ToView("vGoals", "dbo");
+            modelBuilder.Entity<PlanViewDao>().ToView("vPlans", "dbo");
+            modelBuilder.Entity<TaskViewDao>().ToView("vTasks", "dbo");
 
             #endregion
 
@@ -66,6 +72,22 @@ namespace UTask.Backend.Infrastructure.Contexts
             #region NoteDao
 
             modelBuilder.Entity<NoteDao>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            #endregion
+            
+            #region PlanDao
+            
+            modelBuilder.Entity<PlanDao>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            #endregion
+
+            #region PlanPriorityDao
+
+            modelBuilder.Entity<PlanPriorityDao>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
 
@@ -118,13 +140,6 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             #endregion
 
-            #region UserGoalRelationDao
-
-            modelBuilder.Entity<UserGoalRelationDao>()
-                .HasKey(k => new {k.UserId, k.GoalId});
-
-            #endregion
-
             #region UserRoleRelationDao
 
             modelBuilder.Entity<UserRoleRelationDao>()
@@ -140,6 +155,20 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             #endregion
 
+            #region PlanViewDao
+
+            modelBuilder.Entity<PlanViewDao>()
+                .HasKey(p => p.Id);
+
+            #endregion
+
+            #region TaskViewDao
+
+            modelBuilder.Entity<TaskViewDao>()
+                .HasKey(p => p.Id);
+
+            #endregion
+
             #endregion
 
             #region Указываем внешние ключи
@@ -147,6 +176,15 @@ namespace UTask.Backend.Infrastructure.Contexts
             #region CategoryDao
 
             modelBuilder.Entity<CategoryDao>()
+                .HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId);
+
+            #endregion
+
+            #region GoalDao
+
+            modelBuilder.Entity<GoalDao>()
                 .HasOne(x => x.User)
                 .WithMany()
                 .HasForeignKey(x => x.UserId);
@@ -176,12 +214,39 @@ namespace UTask.Backend.Infrastructure.Contexts
 
             #endregion
 
+            #region PlanDao
+
+            modelBuilder.Entity<PlanDao>()
+                .HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId);
+
+            modelBuilder.Entity<PlanDao>()
+                .HasOne(x => x.Task)
+                .WithMany()
+                .HasForeignKey(x => x.TaskId);
+
+            modelBuilder.Entity<PlanDao>()
+                .HasOne(x => x.PlanPriority)
+                .WithMany()
+                .HasForeignKey(x => x.PlanPriorityId);
+
+            #endregion
+
             #region TaskDao
 
+            modelBuilder.Entity<TaskDao>()
+                .HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId);
             modelBuilder.Entity<TaskDao>()
                 .HasOne(x => x.TaskType)
                 .WithMany()
                 .HasForeignKey(x => x.TaskTypeId);
+            modelBuilder.Entity<TaskDao>()
+                .HasOne(x => x.Category)
+                .WithMany()
+                .HasForeignKey(x => x.CategoryId);
 
             #endregion
 
@@ -200,20 +265,6 @@ namespace UTask.Backend.Infrastructure.Contexts
                 .HasOne(x => x.User)
                 .WithMany()
                 .HasForeignKey(x => x.UserId);
-
-            #endregion
-
-            #region UserGoalRelationDao
-
-            modelBuilder.Entity<UserGoalRelationDao>()
-                .HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId);
-
-            modelBuilder.Entity<UserGoalRelationDao>()
-                .HasOne(x => x.Goal)
-                .WithMany()
-                .HasForeignKey(x => x.GoalId);
 
             #endregion
 

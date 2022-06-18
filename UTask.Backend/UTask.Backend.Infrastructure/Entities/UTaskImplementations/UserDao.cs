@@ -9,11 +9,6 @@ namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
     public class UserDao : EntityWithIdDao<long>
     {
         /// <summary>
-        /// Логин
-        /// </summary>
-        [MaxLength(32)]
-        public string Login { get; set; } = string.Empty;
-        /// <summary>
         /// Отображаемое имя
         /// </summary>
         [MaxLength(128)]
@@ -23,10 +18,6 @@ namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
         /// </summary>
         [MaxLength(128)]
         public string Email { get; set; } = string.Empty;
-        /// <summary>
-        /// Дата рождения
-        /// </summary>
-        public DateTime DateOfBirth { get; set; }
         /// <summary>
         /// Соль
         /// </summary>

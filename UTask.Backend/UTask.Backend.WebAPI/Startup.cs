@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
-using UTask.Backend.Domain.Entities.Categories;
-using UTask.Backend.Domain.Entities.Notes;
 
 namespace UTask.Backend.WebAPI
 {
@@ -37,7 +33,7 @@ namespace UTask.Backend.WebAPI
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtOptions:Key"]))
                     };
                 });
-            services.AddControllers().AddOData(opt => opt.Select().Filter().Count().OrderBy().Expand().SetMaxTop(100).AddRouteComponents("odata", GetEdmModel()))
+            services.AddControllers().AddOData(opt => opt.Select().Filter().Count().OrderBy().Expand().SetMaxTop(100))
                 .AddODataNewtonsoftJson();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
@@ -64,14 +60,6 @@ namespace UTask.Backend.WebAPI
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private static IEdmModel GetEdmModel()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Note>("Notes");
-            builder.EntitySet<Category>("Categories");
-            return builder.GetEdmModel();
         }
     }
 }

@@ -19,13 +19,6 @@ namespace UTask.Backend.Domain.Entities.Users
         [DataMember]
         [JsonProperty(PropertyName = "Id")]
         public long Id { get; set; }
-        /// <summary>
-        /// Логин
-        /// </summary>
-        [Display(Name = "Логин")]
-        [DataMember]
-        [JsonProperty(PropertyName = "Login")]
-        public string Login { get; set; } = string.Empty;
 
         /// <summary>
         /// Отображаемое имя
@@ -42,12 +35,21 @@ namespace UTask.Backend.Domain.Entities.Users
         [DataMember]
         [JsonProperty(PropertyName = "Email")]
         public string Email { get; set; } = string.Empty;
+
         /// <summary>
-        /// Дата рождения
+        /// Старый пароль
         /// </summary>
-        [Display(Name = "Дата рождения")]
+        [Display(Name = "Старый пароль")]
         [DataMember]
-        [JsonProperty(PropertyName = "DateOfBirth")]
-        public DateTime DateOfBirth { get; set; }
+        [JsonProperty(PropertyName = "OldPassword")]
+        public string OldPassword { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Новый пароль
+        /// </summary>
+        [Display(Name = "Новый пароль")]
+        [DataMember]
+        [JsonProperty(PropertyName = "NewPassword")]
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

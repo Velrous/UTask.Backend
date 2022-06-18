@@ -1,21 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using UTask.Backend.Infrastructure.Entities.BaseImplementations;
 
-namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
+namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations.Views
 {
     /// <summary>
-    /// Цель
+    /// Цель (Представление)
     /// </summary>
-    public class GoalDao : EntityWithIdDao<long>
+    public class GoalViewDao : EntityWithIdDao<long>
     {
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
         public long UserId { get; set; }
-        /// <summary>
-        /// Пользователь
-        /// </summary>
-        public UserDao? User { get; set; }
         /// <summary>
         /// Наименование
         /// </summary>
@@ -30,5 +26,9 @@ namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
         /// Дата и время создания
         /// </summary>
         public DateTime Created { get; set; }
+        /// <summary>
+        /// Процент выполнения
+        /// </summary>
+        public int PercentageCompletion { get; set; }
     }
 }

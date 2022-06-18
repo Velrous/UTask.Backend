@@ -9,10 +9,10 @@ namespace UTask.Backend.Domain.Mapping.ForWeb
         {
             CreateMap<UserDao, UserForWeb>()
                 .ForMember(p => p.Id, a => a.MapFrom(p => p.Id))
-                .ForMember(p => p.Login, a => a.MapFrom(p => p.Login))
                 .ForMember(p => p.DisplayName, a => a.MapFrom(p => p.DisplayName))
                 .ForMember(p => p.Email, a => a.MapFrom(p => p.Email))
-                .ForMember(p => p.DateOfBirth, a => a.MapFrom(p => p.DateOfBirth))
+                .ForMember(p => p.OldPassword, a => a.MapFrom(p => string.Empty))
+                .ForMember(p => p.NewPassword, a => a.MapFrom(p => string.Empty))
                 ;
         }
     }

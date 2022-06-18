@@ -28,6 +28,12 @@ namespace UTask.Backend.WebAPI.Controllers
 
         #endregion
 
+        #region Вспомогательные переменные
+
+        private readonly string _errorText = "Произошла ошибка при попытке выполнения запроса. Повторите позже или обратитесь в поддержку.";
+
+        #endregion
+
         /// <summary>
         /// Web Api контроллер аутентификации
         /// </summary>
@@ -46,6 +52,32 @@ namespace UTask.Backend.WebAPI.Controllers
             _authService = kernel.Get<IAuthService>();
 
             #endregion
+        }
+
+        [HttpPost("Register")]
+        public ActionResult Register(RegisterModel registerModel)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var authResult = _authService.Register(registerModel);
+                if (authResult.IsSuccess)
+                {
+                    return Ok(authResult);
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status401Unauthorized, authResult);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Произошла ошибка при регистрации");
+                return StatusCode(StatusCodes.Status500InternalServerError, _errorText);
+            }
         }
 
         [HttpPost("Login")]
@@ -73,8 +105,8 @@ namespace UTask.Backend.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Произошла ошибка при аутентификации по данным");
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                _logger.LogError(e, "Произошла ошибка при авторизации по данным");
+                return StatusCode(StatusCodes.Status500InternalServerError, _errorText);
             }
         }
 
@@ -96,8 +128,8 @@ namespace UTask.Backend.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Произошла ошибка при аутентификации по токену");
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                _logger.LogError(e, "Произошла ошибка при авторизации по токену");
+                return StatusCode(StatusCodes.Status500InternalServerError, _errorText);
             }
         }
     }

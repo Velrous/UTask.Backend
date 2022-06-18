@@ -1,37 +1,35 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using UTask.Backend.Infrastructure.Entities.BaseImplementations;
 
-namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations
+namespace UTask.Backend.Infrastructure.Entities.UTaskImplementations.Views
 {
     /// <summary>
-    /// Задача
+    /// Задача (Представление)
     /// </summary>
-    public class TaskDao : EntityWithIdDao<long>
+    public class TaskViewDao : EntityWithIdDao<long>
     {
         /// <summary>
         /// Идентификатор пользователя
         /// </summary>
         public long UserId { get; set; }
         /// <summary>
-        /// Пользователь
-        /// </summary>
-        public UserDao? User { get; set; }
-        /// <summary>
         /// Идентификатор типа задачи
         /// </summary>
         public int TaskTypeId { get; set; }
         /// <summary>
-        /// Тип задачи
+        /// Наименование типа задачи
         /// </summary>
-        public TaskTypeDao? TaskType { get; set; }
+        [MaxLength(128)]
+        public string TaskTypeName { get; set; } = string.Empty;
         /// <summary>
         /// Идентификатор категории
         /// </summary>
         public long? CategoryId { get; set; }
         /// <summary>
-        /// Категория
+        /// Наименование категории
         /// </summary>
-        public CategoryDao? Category { get; set; }
+        [MaxLength(128)]
+        public string? CategoryName { get; set; }
         /// <summary>
         /// Наименование
         /// </summary>

@@ -23,6 +23,12 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
     /// </summary>
     public class AuthService : BaseService, IAuthService
     {
+        #region Контексты
+
+        private readonly UTaskContext _utaskContext;
+
+        #endregion
+
         #region Репозитории
 
         private readonly IEntityWithIdRepository<UserDao, long> _userRepository;
@@ -48,13 +54,13 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
 
             #region Получаем экземпляры EF контекстов
 
-            var uTaskContext = kernel.Get<UTaskContext>();
+            _utaskContext = kernel.Get<UTaskContext>();
 
             #endregion
 
             #region Получаем экземпляры требуемых репозиториев
 
-            _userRepository = kernel.Get<IEntityWithIdRepository<UserDao, long>>(new ConstructorArgument("context", uTaskContext));
+            _userRepository = kernel.Get<IEntityWithIdRepository<UserDao, long>>(new ConstructorArgument("context", _utaskContext));
 
             #endregion
 
@@ -72,18 +78,127 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         }
 
         /// <summary>
+        /// Производит регистрацию пользователя по переданным данным
+        /// </summary>
+        /// <param name="registerModel">Данные для регистрации</param>
+        /// <returns>Результат авторизации</returns>
+        public AuthResultModel Register(RegisterModel registerModel)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(registerModel.DisplayName))
+                {
+                    if (!string.IsNullOrWhiteSpace(registerModel.Email))
+                    {
+                        if (!string.IsNullOrWhiteSpace(registerModel.Password))
+                        {
+                            var userDao = _userRepository.GetQueryable()
+                                .FirstOrDefault(x => x.Email.ToLower() == registerModel.Email.ToLower());
+                            if (userDao == null)
+                            {
+                                var saltAndPassword = CreatePassword("", registerModel.Password);
+                                if (!string.IsNullOrWhiteSpace(saltAndPassword.salt) &&
+                                    !string.IsNullOrWhiteSpace(saltAndPassword.passwordHash))
+                                {
+                                    userDao = _userRepository.Create(new UserDao
+                                    {
+                                        DisplayName = registerModel.DisplayName,
+                                        Email = registerModel.Email,
+                                        Salt = saltAndPassword.salt,
+                                        PasswordHash = saltAndPassword.passwordHash,
+                                        Created = DateTime.Now,
+                                        IsActive = true
+                                    });
+                                    _utaskContext.SaveChanges();
+
+                                    var token = GenerateToken(userDao, true);
+                                    if (!string.IsNullOrWhiteSpace(token))
+                                    {
+                                        return new AuthResultModel
+                                        {
+                                            DisplayName = userDao.DisplayName,
+                                            Token = token,
+                                            IsSuccess = true,
+                                            ErrorText = string.Empty
+                                        };
+                                    }
+                                    else
+                                    {
+                                        return new AuthResultModel
+                                        {
+                                            IsSuccess = false,
+                                            ErrorText = $"Произошла ошибка при попытке регистрации: Ошибка при попытке генерации токена"
+                                        };
+                                    }
+                                }
+                                else
+                                {
+                                    return new AuthResultModel
+                                    {
+                                        IsSuccess = false,
+                                        ErrorText = $"Произошла ошибка при попытке регистрации: Ошибка при генерации пароля"
+                                    };
+                                }
+                            }
+                            else
+                            {
+                                return new AuthResultModel
+                                {
+                                    IsSuccess = false,
+                                    ErrorText = $"Произошла ошибка при попытке регистрации: Пользователь с таким логином или электронной почтой уже существует"
+                                };
+                            }
+                        }
+                        else
+                        {
+                            return new AuthResultModel
+                            {
+                                IsSuccess = false,
+                                ErrorText = $"Произошла ошибка при попытке регистрации: Передан пустой пароль"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        return new AuthResultModel
+                        {
+                            IsSuccess = false,
+                            ErrorText = $"Произошла ошибка при попытке регистрации: Передана пустая электронная почта"
+                        };
+                    }
+                }
+                else
+                {
+                    return new AuthResultModel
+                    {
+                        IsSuccess = false,
+                        ErrorText = $"Произошла ошибка при попытке регистрации: Передано пустое имя и фамилия пользователя"
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return new AuthResultModel
+                {
+                    IsSuccess = false,
+                    ErrorText = $"Произошла ошибка при попытке регистрации: {e.Message}"
+                };
+            }
+        }
+
+        /// <summary>
         /// Производит аутентификацию пользователя для веб интерфейса
         /// </summary>
         /// <param name="authModel">Данные аутентификации</param>
-        /// <returns>Результат аутентификации</returns>
+        /// <returns>Результат авторизации</returns>
         public AuthResultModel AuthByСredentials(AuthModel authModel)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(authModel.Login) && !string.IsNullOrWhiteSpace(authModel.Password))
+                if (!string.IsNullOrWhiteSpace(authModel.Email) && !string.IsNullOrWhiteSpace(authModel.Password))
                 {
                     var userDao = _userRepository.GetQueryable()
-                        .FirstOrDefault(x => x.Login.ToLower().Equals(authModel.Login.ToLower()));
+                        .FirstOrDefault(x => x.Email.ToLower().Equals(authModel.Email.ToLower()));
                     if (userDao != null)
                     {
                         if (!string.IsNullOrWhiteSpace(userDao.PasswordHash) && !string.IsNullOrWhiteSpace(userDao.Salt))
@@ -91,7 +206,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                             var saltAndPassword = CreatePassword(userDao.Salt, authModel.Password);
                             if (saltAndPassword.passwordHash.Equals(userDao.PasswordHash))
                             {
-                                var token = GenerateToken(userDao);
+                                var token = GenerateToken(userDao, authModel.IsNeedRemember);
                                 if (!string.IsNullOrWhiteSpace(token))
                                 {
                                     return new AuthResultModel
@@ -160,7 +275,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         /// <summary>
         /// Производит аутентификацию пользователя для веб интерфейса по полученному токену
         /// </summary>
-        /// <returns>Результат аутентификации</returns>
+        /// <returns>Результат авторизации</returns>
         public AuthResultModel AuthByToken()
         {
             try
@@ -214,7 +329,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         /// <param name="salt">Соль</param>
         /// <param name="password">Пароль</param>
         /// <returns>Соль и хэш пароля</returns>
-        private (string salt, string passwordHash) CreatePassword(string salt, string? password)
+        private (string salt, string passwordHash) CreatePassword(string salt, string password)
         {
             if (string.IsNullOrWhiteSpace(salt))
             {
@@ -228,8 +343,9 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
         /// Генерирует токен
         /// </summary>
         /// <param name="userDao">Данные пользователя</param>
+        /// <param name="isNeedRemember">Признак необходимости запомнить пользователя</param>
         /// <returns>Токен</returns>
-        private string GenerateToken(UserDao userDao)
+        private string GenerateToken(UserDao userDao, bool isNeedRemember)
         {
             if (!string.IsNullOrWhiteSpace(_jwtOptions.Key) && 
                 !string.IsNullOrWhiteSpace(_jwtOptions.Audience) && 
@@ -244,7 +360,7 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                     //new Claim(ClaimTypes.Role, userDao.RoleId.ToString())
                 };
                 var token = new JwtSecurityToken(_jwtOptions.Issuer, _jwtOptions.Audience, claims,
-                    expires: DateTime.Now.AddHours(_jwtOptions.ExpirationTime),
+                    expires: DateTime.Now.AddHours(isNeedRemember ? _jwtOptions.ExpirationTime : 1),
                     signingCredentials: credentials);
 
                 return new JwtSecurityTokenHandler().WriteToken(token);
