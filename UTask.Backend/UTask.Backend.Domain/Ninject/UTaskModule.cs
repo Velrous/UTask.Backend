@@ -82,7 +82,6 @@ namespace UTask.Backend.Domain.Ninject
             Bind<IPlanPriorityService>().To<PlanPriorityService>();
             Bind<IPlanService>().To<PlanService>();
             Bind<IPlanViewService>().To<PlanViewService>();
-            Bind<IRoleService>().To<RoleService>();
             Bind<ITaskService>().To<TaskService>();
             Bind<ITaskTypeService>().To<TaskTypeService>();
             Bind<IUserService>().To<UserService>();

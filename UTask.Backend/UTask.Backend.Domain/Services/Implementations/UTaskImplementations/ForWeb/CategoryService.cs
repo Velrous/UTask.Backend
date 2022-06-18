@@ -78,15 +78,28 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                 {
                     if (ServerContext.UserId > 0)
                     {
-                        var categoryDao = new CategoryDao
+                        var similarCategoryDao = _categoryRepository.GetQueryable()
+                            .Where(x => x.UserId == ServerContext.UserId)
+                            .FirstOrDefault(x => x.Name.ToLower().Equals(category.Name.ToLower()));
+                        if (similarCategoryDao == null)
                         {
-                            UserId = ServerContext.UserId,
-                            Name = category.Name,
-                            Created = DateTime.Now
-                        };
-                        categoryDao = _categoryRepository.Create(categoryDao);
-                        _utaskContext.SaveChanges();
-                        return _mapper.Map<Category>(categoryDao);
+                            var categoryDao = new CategoryDao
+                            {
+                                UserId = ServerContext.UserId,
+                                Name = category.Name,
+                                Created = DateTime.Now
+                            };
+                            categoryDao = _categoryRepository.Create(categoryDao);
+                            _utaskContext.SaveChanges();
+                            return _mapper.Map<Category>(categoryDao);
+                        }
+                        else
+                        {
+                            similarCategoryDao.Created = DateTime.Now;
+                            _categoryRepository.Update(similarCategoryDao);
+                            _utaskContext.SaveChanges();
+                            return _mapper.Map<Category>(similarCategoryDao);
+                        }
                     }
                     else
                     {
@@ -144,9 +157,22 @@ namespace UTask.Backend.Domain.Services.Implementations.UTaskImplementations.For
                     {
                         if (ServerContext.UserId == categoryDao.UserId)
                         {
-                            categoryDao.Name = category.Name;
-                            _categoryRepository.Update(categoryDao);
-                            _utaskContext.SaveChanges();
+                            var similarCategoryDao = _categoryRepository.GetQueryable()
+                                .Where(x => x.UserId == ServerContext.UserId)
+                                .FirstOrDefault(x => x.Name.ToLower().Equals(category.Name.ToLower()));
+                            if (similarCategoryDao == null)
+                            {
+                                categoryDao.Name = category.Name;
+                                _categoryRepository.Update(categoryDao);
+                                _utaskContext.SaveChanges();
+                            }
+                            else
+                            {
+                                _categoryRepository.Delete(categoryDao);
+                                similarCategoryDao.Created = DateTime.Now;
+                                _categoryRepository.Update(similarCategoryDao);
+                                _utaskContext.SaveChanges();
+                            }
                         }
                         else
                         {
